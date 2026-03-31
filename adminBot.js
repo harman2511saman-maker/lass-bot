@@ -8,13 +8,22 @@ http.createServer((req, res) => {
     res.end('Bot is Live and Running!');
 }).listen(process.env.PORT || 3000);
 
+const http = require('http');
+const port = process.env.PORT || 3000;
+
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot is running properly!\n');
+}).listen(port, () => {
+  console.log(`Server is listening on port ${port}`);
+});
 // دەستپێکردنی فایەربەیس بە فایلە نوێیەکە
 const serviceAccount = require("./serviceAccountKey.json");
 
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
-        databaseURL: "https://تێرە-ناوی-پڕۆژەکەت-بنووسە.firebaseio.com"
+        databaseURL: "https://prsyarbka-b78f8-default-rtdb.firebaseio.com"
     });
 }
 
