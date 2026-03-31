@@ -1,20 +1,15 @@
 const TelegramBot = require('node-telegram-bot-api');
 const admin = require('firebase-admin');
-const http = require('http');
+const express = require('express'); // بەکارهێنانی express بۆ Render
 
-// 1. Create a simple server to keep Render happy (Port Scan Timeout fix)
-const port = process.env.PORT || 3000;
-http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Bot is running properly!\n');
-}).listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
-});
+const app = express();
+app.use(express.json());
 
-// 2. Initialize Firebase
-// Make sure "serviceAccountKey.json" is in the same folder
+const token = '8278393908:AAGes1TOJRRdmJAPMWA071ce30nufwoRxN0'; // تۆکنە نوێیەکە
+const bot = new TelegramBot(token, { polling: true });
+
+// Firebase Initialization
 const serviceAccount = require("./serviceAccountKey.json");
-
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
@@ -22,19 +17,17 @@ if (!admin.apps.length) {
     });
 }
 
-const db = admin.firestore();
-// Use your token from BotFather
-const bot = new TelegramBot('8278393908:AAGes1TOJRRdmJAPMWA071ce30nufwoRxN0', {polling: true});
-
-console.log("✅ Firebase & Bot are ready!");
-
-// 3. Simple Bot Command
-bot.onText(/\/start/, (msg) => {
-    bot.sendMessage(msg.chat.id, "بەخێرهاتی! بۆتەکە بە سەرکەوتوویی لەسەر Render کار دەکات.");
+// ڕێگریکردن لە وەستانی سێرڤەرەکە لە Render
+app.get('/', (req, res) => res.send('Bot is Live!'));
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
 });
 
+console.log("✅ Bot is monitoring messages...");
+
+// وەڵامدانەوەی نامەکان
 bot.on('message', (msg) => {
-    if (msg.text !== '/start') {
-        console.log("New message received:", msg.text);
-    }
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, "سڵاو! نامەکەت گەیشت: " + msg.text);
 });
